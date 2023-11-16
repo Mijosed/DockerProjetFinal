@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+  nginx1:
+    image: nginx:latest
+    container_name: nginx1
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx1.conf:/etc/nginx/nginx.conf
+      - ./code:/var/www/html
+    depends_on:
+      - php1
+      - mysql
+    links:
+      - php1
+
+  nginx2:
+    image: nginx:latest
+    container_name: nginx2
+    ports:
+      - "8082:80"
+    volumes:
+      - ./nginx2.conf:/etc/nginx/nginx.conf
+      - ./code:/var/www/html
+    depends_on:
+      - php2
+      - mysql
+    links:
+      - php2
+
+  php1:
+    build:
+      context: .
+      dockerfile: Dockerfile.php
+    container_name: php1
+    volumes:
+      - ./code:/var/www/html
+    environment:
+      - DB_HOST=mysql
+    depends_on:
+      - mysql
+
+  php2:
+    build:
+      context: .
+      dockerfile: Dockerfile.php
+    container_name: php2
+    volumes:
+      - ./code:/var/www/html
+    environment:
+      - DB_HOST=mysql
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=laravel
+      - MYSQL_USER=laravel_user
+      - MYSQL_PASSWORD=laravel_password
+    ports:
+      - "3306:3306"
+
+volumes:
+  mysql_data: {}
