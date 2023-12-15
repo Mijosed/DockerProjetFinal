@@ -54,11 +54,11 @@ services:
       - mysql
 
   mysql:
-    image: mysql:latest
+    image: mysql:5.7
     container_name: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=laravel
+      - MYSQL_DATABASE=laraveldb
       - MYSQL_USER=laravel_user
       - MYSQL_PASSWORD=laravel_password
     ports:
