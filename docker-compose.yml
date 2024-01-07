@@ -1,6 +1,7 @@
 version: '3'
 
 services:
+  #nginx1
   nginx1:
     image: nginx:latest
     container_name: nginx1
@@ -15,6 +16,7 @@ services:
     links:
       - php1
 
+  #nginx2
   nginx2:
     image: nginx:latest
     container_name: nginx2
@@ -29,6 +31,7 @@ services:
     links:
       - php2
 
+  #app1
   php1:
     build:
       context: .
@@ -37,10 +40,11 @@ services:
     volumes:
       - ./code:/var/www/html
     environment:
-      - DB_HOST=mysql
+      - DB_HOST=data_base
     depends_on:
-      - mysql
-
+      - data_base
+  
+  #app2
   php2:
     build:
       context: .
@@ -49,18 +53,19 @@ services:
     volumes:
       - ./code:/var/www/html
     environment:
-      - DB_HOST=mysql
+      - DB_HOST=data_base
     depends_on:
-      - mysql
-
-  mysql:
+      - data_base
+  
+  #mysql
+  data_base:
     image: mysql:5.7
-    container_name: mysql
+    container_name: data_base
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=laraveldb
-      - MYSQL_USER=laravel_user
-      - MYSQL_PASSWORD=laravel_password
+      - MYSQL_USER=laravel
+      - MYSQL_PASSWORD=password
     ports:
       - "3306:3306"
 
