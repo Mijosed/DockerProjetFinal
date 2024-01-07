@@ -1,35 +1,18 @@
 version: '3'
 
 services:
-  #nginx1
-  nginx1:
-    image: nginx:latest
-    container_name: nginx1
-    ports:
-      - "8081:80"
-    volumes:
-      - ./nginx1.conf:/etc/nginx/nginx.conf
-      - ./code:/var/www/html
-    depends_on:
-      - php1
-      - mysql
-    links:
-      - php1
 
-  #nginx2
-  nginx2:
-    image: nginx:latest
-    container_name: nginx2
+  #mysql
+  db:
+    image: mysql:5.7
+    container_name: db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=laraveldb
+      - MYSQL_USER=laravel
+      - MYSQL_PASSWORD=password
     ports:
-      - "8082:80"
-    volumes:
-      - ./nginx2.conf:/etc/nginx/nginx.conf
-      - ./code:/var/www/html
-    depends_on:
-      - php2
-      - mysql
-    links:
-      - php2
+      - "3306:3306"
 
   #app1
   php1:
@@ -40,9 +23,9 @@ services:
     volumes:
       - ./code:/var/www/html
     environment:
-      - DB_HOST=data_base
+      - DB_HOST=db
     depends_on:
-      - data_base
+      - db
   
   #app2
   php2:
@@ -53,21 +36,41 @@ services:
     volumes:
       - ./code:/var/www/html
     environment:
-      - DB_HOST=data_base
-    depends_on:
-      - data_base
-  
-  #mysql
-  data_base:
-    image: mysql:5.7
-    container_name: data_base
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=laraveldb
-      - MYSQL_USER=laravel
-      - MYSQL_PASSWORD=password
+      - DB_HOST=db
+
+  #nginx1
+  nginx1:
+    image: nginx:alpine
+    container_name: nginx1
     ports:
-      - "3306:3306"
+      - "8080:80"
+    volumes:
+      - ./nginx1.conf:/etc/nginx/nginx.conf
+      - ./code:/var/www/html
+    links:
+      - php1
+
+  #nginx2
+  nginx2:
+    image: nginx:alpine
+    container_name: nginx2
+    ports:
+      - "8082:80"
+    volumes:
+      - ./nginx2.conf:/etc/nginx/nginx.conf
+      - ./code:/var/www/html
+    links:
+      - php2
+
+  #phpmyadmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+    - PMA_HOST=db
+    - PMA_USER=laravel
+    - PMA_PASSWORD=password
+    - PMA_ARBITRARY=1
 
 volumes:
   mysql_data: {}
