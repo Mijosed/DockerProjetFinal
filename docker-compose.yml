@@ -2,10 +2,9 @@ version: '3'
 
 services:
 
-  #mysql
   db:
     image: mysql:5.7
-    container_name: db
+    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=laraveldb
@@ -17,31 +16,43 @@ services:
   #app1
   php1:
     build:
-      context: .
-      dockerfile: Dockerfile.php
-    container_name: php1
+      context: app
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5000:80"
     volumes:
       - ./code:/var/www/html
     environment:
       - DB_HOST=db
     depends_on:
       - db
+    links:
+      - db
   
   #app2
   php2:
     build:
-      context: .
-      dockerfile: Dockerfile.php
-    container_name: php2
+      context: app
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "6000:80"
     volumes:
       - ./code:/var/www/html
     environment:
       - DB_HOST=db
+    depends_on:
+      - db
+    links:
+      - db
 
   #nginx1
   nginx1:
-    image: nginx:alpine
-    container_name: nginx1
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    restart: always
     ports:
       - "8080:80"
     volumes:
@@ -52,8 +63,10 @@ services:
 
   #nginx2
   nginx2:
-    image: nginx:alpine
-    container_name: nginx2
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    restart: always
     ports:
       - "8082:80"
     volumes:
