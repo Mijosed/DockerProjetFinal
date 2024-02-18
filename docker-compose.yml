@@ -1,6 +1,23 @@
 version: '3'
 
 services:
+  # Traefik
+  traefik:
+    image: traefik:v2.5
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8084:8080" # Port for Traefik Dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - app_network
+
   # MySQL
   db:
     image: mysql:5.7
@@ -10,8 +27,6 @@ services:
       MYSQL_DATABASE: laraveldb
       MYSQL_USER: laravel
       MYSQL_PASSWORD: password
-    ports:
-      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -34,10 +49,12 @@ services:
       - db
     networks:
       - app_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.php1.rule=Host(`php1.localhost`)"
+      - "traefik.http.services.php1.loadbalancer.server.port=9000"
     command: ["/bin/sh", "/usr/local/bin/install.sh"]
-    expose:
-    - 9000
-  
+
   # App2 - PHP
   php2:
     build:
@@ -54,9 +71,11 @@ services:
       - db
     networks:
       - app_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.php2.rule=Host(`php2.localhost`)"
+      - "traefik.http.services.php2.loadbalancer.server.port=9000"
     command: ["/bin/sh", "/usr/local/bin/install.sh"]
-    expose:
-    - 9000
 
   # Nginx1
   nginx1:
@@ -69,6 +88,10 @@ services:
       - ./:/var/www/html
     networks:
       - app_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx1.rule=Host(`nginx1.localhost`)"
+      - "traefik.http.services.nginx1.loadbalancer.server.port=80"
   
   # Nginx2
   nginx2:
@@ -81,13 +104,15 @@ services:
       - ./:/var/www/html
     networks:
       - app_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx2.rule=Host(`nginx2.localhost`)"
+      - "traefik.http.services.nginx2.loadbalancer.server.port=80"
 
   # phpMyAdmin
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     restart: always
-    ports:
-      - "8083:80"
     environment:
       PMA_HOST: db
       PMA_USER: laravel
@@ -95,6 +120,10 @@ services:
       PMA_ARBITRARY: 1
     networks:
       - app_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.localhost`)"
+      - "traefik.http.services.phpmyadmin.loadbalancer.server.port=80"
 
 networks:
   app_network: {}
