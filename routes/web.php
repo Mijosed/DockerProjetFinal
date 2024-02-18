@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome', ['server' => getenv('SERVER_NOM')]);
 });
 
 Route::get('/dashboard', function () {
