@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Mettre à jour Composer à la version souhaitée
+# Mettre à jour Composer à la version que vous souhaitez
 composer self-update --2
 
 # Installer les dépendances Laravel
